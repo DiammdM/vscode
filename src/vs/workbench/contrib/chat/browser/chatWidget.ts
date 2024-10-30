@@ -498,7 +498,7 @@ export class ChatWidget extends Disposable implements IChatWidget {
 		if (topOffset < 0) {
 			// Scroll up
 			this.tree.scrollTop += topOffset;
-		} else if (bottomOffset > 0 && bottomOffset > this.tree.renderHeight / 2) {
+		} else if (bottomOffset > 0 && bottomOffset > this.tree.renderHeight / 3) {
 			// Scroll down
 			this.tree.scrollTop += bottomOffset;
 		}
