@@ -488,29 +488,60 @@ export class ChatWidget extends Disposable implements IChatWidget {
 		}, true);
 	}
 
+	private _isElementInView(element: HTMLElement): boolean {
+		const container = this.listContainer;
+		if (!container) {
+			return false;
+		}
+
+		const currentScrollTop = this.tree.scrollTop;
+		const containerHeight = container.clientHeight;
+
+		const elementTop = element.offsetTop;
+		const elementBottom = elementTop + element.offsetHeight;
+
+		const isFullyVisible =
+			elementTop >= currentScrollTop &&
+			elementBottom <= currentScrollTop + containerHeight;
+
+		return isFullyVisible;
+	}
+
+
 	private _scrollToActiveElement(element: HTMLElement): void {
-		// Get the container element and ensure it exists
+		// Ensure the container exists
 		const container = this.listContainer;
 		if (!container) {
 			return;
 		}
 
-		const containerRect = container.getBoundingClientRect();
-		const elementRect = element.getBoundingClientRect();
+		if (this._isElementInView(element)) {
+			return;
+		}
+
+		// Use the current scroll position of the container
 		const currentScrollTop = this.tree.scrollTop;
 
-		if (elementRect.top < containerRect.top) {
-			// Element is above the visible area, scroll up
-			const newScrollTop = currentScrollTop - (containerRect.top - elementRect.top);
-			this.tree.scrollTop = newScrollTop;
-		} else if (elementRect.bottom > containerRect.bottom) {
-			// Element is below the visible area, scroll down
-			const newScrollTop = currentScrollTop + (elementRect.bottom - containerRect.bottom);
+		// Calculate the position of the element relative to the container's scroll
+		const elementOffsetTop = element.offsetTop;
+		const elementOffsetBottom = elementOffsetTop + element.offsetHeight;
 
-			// Make sure we don't scroll more than necessary to align with the bottom
-			this.tree.scrollTop = Math.min(newScrollTop, this.tree.scrollHeight - container.clientHeight);
+		// Define a small buffer to ensure full visibility
+		const buffer = 10;
+
+		// Check if the element is above or below the current visible area
+		if (elementOffsetTop !== 0 && elementOffsetTop < currentScrollTop) {
+			console.log('scrolling up', elementOffsetTop);
+			// Element is above the visible area, scroll up
+			this.tree.scrollTop = elementOffsetTop - buffer;
+		} else if (elementOffsetBottom > 0 && elementOffsetBottom > currentScrollTop + container.clientHeight) {
+			// Element is below or partially visible at the bottom, scroll down with buffer
+			console.log('scrolling down', elementOffsetBottom, currentScrollTop + container.clientHeight);
+			const newScrollTop = currentScrollTop + (elementOffsetBottom - (currentScrollTop + container.clientHeight)) + buffer;
+			this.tree.scrollTop = newScrollTop;
 		}
 	}
+
 
 	getContrib<T extends IChatWidgetContrib>(id: string): T | undefined {
 		return this.contribs.find(c => c.id === id) as T;
