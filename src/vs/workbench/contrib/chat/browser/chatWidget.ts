@@ -530,7 +530,7 @@ export class ChatWidget extends Disposable implements IChatWidget {
 		const buffer = 10;
 
 		// Check if the element is above or below the current visible area
-		if (elementOffsetTop !== 0 && elementOffsetTop < currentScrollTop) {
+		if (elementOffsetTop !== 0 && elementOffsetTop < currentScrollTop && !(elementOffsetBottom > currentScrollTop)) {
 			console.log('scrolling up', elementOffsetTop);
 			// Element is above the visible area, scroll up
 			this.tree.scrollTop = elementOffsetTop - buffer;
